@@ -3,6 +3,7 @@ import { Canvas, Rect, Circle, Textbox } from "fabric";
 import { IconButton } from "blocksin-system";
 import { CircleIcon, SquareIcon, TextIcon } from "sebikostudio-icons";
 import "../../styles/styles.scss";
+import Settings from "./settings";
 
 export default function Toolbar() {
   const canvasRef = useRef(null);
@@ -79,6 +80,7 @@ export default function Toolbar() {
         </IconButton>
       </div>
       <canvas id="canvas" ref={canvasRef} />
+      <Settings canvas={canvas} />
     </div>
   );
 }
