@@ -1,9 +1,18 @@
+// src/app/components/Toolbar.js
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
 import { IconButton } from "blocksin-system";
-import { CircleIcon, SquareIcon, TextIcon } from "sebikostudio-icons";
+import {
+  CircleIcon,
+  SquareIcon,
+  TextIcon,
+  ImageIcon,
+} from "sebikostudio-icons";
 import "../../styles/styles.scss";
 import Settings from "./settings";
+import Image from "./image";
 
 export default function Toolbar() {
   const canvasRef = useRef(null);
@@ -15,12 +24,9 @@ export default function Toolbar() {
         width: 500,
         height: 500,
       });
-
       initCanvas.backgroundColor = "#fff";
       initCanvas.renderAll();
-
       setCanvas(initCanvas);
-
       return () => {
         initCanvas.dispose();
       };
@@ -36,10 +42,10 @@ export default function Toolbar() {
         height: 60,
         fill: "#D84D42",
       });
-
       canvas.add(rect);
     }
   };
+
   const addCircle = () => {
     if (canvas) {
       const circ = new Circle({
@@ -48,7 +54,6 @@ export default function Toolbar() {
         radius: 60,
         fill: "#0000FF",
       });
-
       canvas.add(circ);
     }
   };
@@ -61,7 +66,6 @@ export default function Toolbar() {
         fill: "black",
         fontSize: 24,
       });
-
       canvas.add(textBox);
     }
   };
@@ -78,6 +82,7 @@ export default function Toolbar() {
         <IconButton onClick={addText} variant="ghost" size="medium">
           <TextIcon />
         </IconButton>
+        <Image canvas={canvas} canvasRef={canvasRef} />
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />
