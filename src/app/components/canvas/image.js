@@ -1,12 +1,7 @@
+import React, { useRef, useState } from "react";
 import { FabricImage } from "fabric";
-import React, { useState, useRef } from "react";
-import { ImageIcon } from "sebikostudio-icons";
-
-import dynamic from "next/dynamic";
-const IconButton = dynamic(
-  () => import("blocksin-system").then((mod) => mod.IconButton),
-  { ssr: false }
-);
+import { FaImage } from "react-icons/fa";
+import Button from "@mui/material/Button";
 
 export default function Image({ canvas }) {
   const [imageSrc, setImageSrc] = useState(null);
@@ -60,21 +55,18 @@ export default function Image({ canvas }) {
 
   return (
     <div>
-      {/* <button onClick={handleImageUploadButtonClick}>Upload Image</button> */}
       <input
         type="file"
         accept="image/*"
         ref={fileInputRef}
-        onChange={handleImageUpload}
         style={{ display: "none" }}
+        onChange={handleImageUpload}
       />
-      <IconButton
+      <Button
+        startIcon={<FaImage />}
+        variant="outlined"
         onClick={handleImageUploadButtonClick}
-        variant="ghost"
-        size="medium"
-      >
-        <ImageIcon />
-      </IconButton>
+      ></Button>
     </div>
   );
 }

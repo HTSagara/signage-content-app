@@ -1,23 +1,11 @@
-// src/app/components/Toolbar.js
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
-
-import {
-  CircleIcon,
-  SquareIcon,
-  TextIcon,
-  FloppyDiskIcon,
-} from "sebikostudio-icons";
+import { FaSquare, FaCircle, FaFont, FaSave } from "react-icons/fa"; // Icons
+import Button from "@mui/material/Button"; // Material-UI Button
 import "./styles.scss";
 import Settings from "./settings";
 import Image from "./image";
-
-import dynamic from "next/dynamic";
-const IconButton = dynamic(
-  () => import("blocksin-system").then((mod) => mod.IconButton),
-  { ssr: false }
-);
 
 export default function Toolbar() {
   const canvasRef = useRef(null);
@@ -81,16 +69,13 @@ export default function Toolbar() {
       return;
     }
 
-    // Prompt the user for a name
     const canvasName = prompt("Enter a name for your canvas:");
     if (!canvasName) {
       alert("Canvas name is required!");
       return;
     }
 
-    // Serialize the canvas content
     const canvasJSON = canvas.toJSON();
-
     try {
       const response = await fetch("/api/saveCanvas", {
         method: "POST",
@@ -115,19 +100,27 @@ export default function Toolbar() {
   return (
     <div>
       <div className="Toolbar darkmode">
-        <IconButton onClick={addRectangle} variant="ghost" size="medium">
-          <SquareIcon />
-        </IconButton>
-        <IconButton onClick={addCircle} variant="ghost" size="medium">
-          <CircleIcon />
-        </IconButton>
-        <IconButton onClick={addText} variant="ghost" size="medium">
-          <TextIcon />
-        </IconButton>
+        <Button
+          onClick={addRectangle}
+          variant="outlined"
+          startIcon={<FaSquare />}
+        ></Button>
+        <Button
+          onClick={addCircle}
+          variant="outlined"
+          startIcon={<FaCircle />}
+        ></Button>
+        <Button
+          onClick={addText}
+          variant="outlined"
+          startIcon={<FaFont />}
+        ></Button>
         <Image canvas={canvas} canvasRef={canvasRef} />
-        <IconButton onClick={saveCanvas} variant="ghost" size="medium">
-          <FloppyDiskIcon />
-        </IconButton>
+        <Button
+          onClick={saveCanvas}
+          variant="contained"
+          startIcon={<FaSave />}
+        ></Button>
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />
