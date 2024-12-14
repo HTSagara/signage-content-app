@@ -2,7 +2,13 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
-import { CircleIcon, SquareIcon, TextIcon } from "sebikostudio-icons";
+
+import {
+  CircleIcon,
+  SquareIcon,
+  TextIcon,
+  FloppyDiskIcon,
+} from "sebikostudio-icons";
 import "./styles.scss";
 import Settings from "./settings";
 import Image from "./image";
@@ -69,6 +75,43 @@ export default function Toolbar() {
     }
   };
 
+  const saveCanvas = async () => {
+    if (!canvas) {
+      alert("No canvas to save!");
+      return;
+    }
+
+    // Prompt the user for a name
+    const canvasName = prompt("Enter a name for your canvas:");
+    if (!canvasName) {
+      alert("Canvas name is required!");
+      return;
+    }
+
+    // Serialize the canvas content
+    const canvasJSON = canvas.toJSON();
+
+    try {
+      const response = await fetch("/api/saveCanvas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: canvasName, content: canvasJSON }),
+      });
+
+      if (response.ok) {
+        alert("Canvas saved successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to save canvas: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error saving canvas:", error);
+      alert("An error occurred while saving the canvas.");
+    }
+  };
+
   return (
     <div>
       <div className="Toolbar darkmode">
@@ -82,6 +125,9 @@ export default function Toolbar() {
           <TextIcon />
         </IconButton>
         <Image canvas={canvas} canvasRef={canvasRef} />
+        <IconButton onClick={saveCanvas} variant="ghost" size="medium">
+          <FloppyDiskIcon />
+        </IconButton>
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />
