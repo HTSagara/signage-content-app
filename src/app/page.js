@@ -2,7 +2,7 @@
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";
 import "@/styles/styles.scss";
-import Toolbar from "./components/toolbar";
+import Toolbar from "./components/canvas/toolbar";
 
 export default function Home() {
   return (

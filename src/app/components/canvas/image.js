@@ -1,7 +1,12 @@
-import { IconButton } from "blocksin-system";
 import { FabricImage } from "fabric";
 import React, { useState, useRef } from "react";
 import { ImageIcon } from "sebikostudio-icons";
+
+import dynamic from "next/dynamic";
+const IconButton = dynamic(
+  () => import("blocksin-system").then((mod) => mod.IconButton),
+  { ssr: false }
+);
 
 export default function Image({ canvas }) {
   const [imageSrc, setImageSrc] = useState(null);
@@ -10,7 +15,7 @@ export default function Image({ canvas }) {
 
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
-    if (file) {
+    if (file && typeof document !== "undefined") {
       const url = URL.createObjectURL(file);
       setImageSrc(url);
 

@@ -1,25 +1,24 @@
 // src/app/components/Toolbar.js
 "use client";
-
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
-import { IconButton } from "blocksin-system";
-import {
-  CircleIcon,
-  SquareIcon,
-  TextIcon,
-  ImageIcon,
-} from "sebikostudio-icons";
-import "../../styles/styles.scss";
+import { CircleIcon, SquareIcon, TextIcon } from "sebikostudio-icons";
+import "./styles.scss";
 import Settings from "./settings";
 import Image from "./image";
+
+import dynamic from "next/dynamic";
+const IconButton = dynamic(
+  () => import("blocksin-system").then((mod) => mod.IconButton),
+  { ssr: false }
+);
 
 export default function Toolbar() {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
-    if (canvasRef.current) {
+    if (canvasRef.current && typeof document !== "undefined") {
       const initCanvas = new Canvas(canvasRef.current, {
         width: 500,
         height: 500,

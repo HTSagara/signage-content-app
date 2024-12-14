@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Input } from "blocksin-system";
+
+import dynamic from "next/dynamic";
+const Input = dynamic(
+  () => import("blocksin-system").then((mod) => mod.Input),
+  { ssr: false }
+);
 
 export default function Settings({ canvas }) {
   const [selectedObject, setSelectedObject] = useState(null);
@@ -9,7 +14,7 @@ export default function Settings({ canvas }) {
   const [color, setColor] = useState("");
 
   useEffect(() => {
-    if (canvas) {
+    if (canvas && typeof document !== "undefined") {
       canvas.on("selection:created", (event) => {
         handleObjectSelection(event.selected[0]);
       });
