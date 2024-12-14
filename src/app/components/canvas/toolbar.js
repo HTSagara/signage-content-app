@@ -1,3 +1,4 @@
+//src/app/components/canvas/toolbar.js
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
@@ -7,24 +8,45 @@ import "./styles.scss";
 import Settings from "./settings";
 import Image from "./image";
 
-export default function Toolbar() {
+export default function Toolbar({ initialCanvasData }) {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
 
   useEffect(() => {
-    if (canvasRef.current && typeof document !== "undefined") {
+    if (canvasRef.current) {
+      // Initialize Fabric.js Canvas
       const initCanvas = new Canvas(canvasRef.current, {
         width: 500,
         height: 500,
+        backgroundColor: initialCanvasData?.background || "#fff",
       });
-      initCanvas.backgroundColor = "#fff";
-      initCanvas.renderAll();
+
+      // Log initialCanvasData for debugging
+      console.log("Initial Canvas Data:", initialCanvasData);
+
+      // Load existing canvas data if available
+      if (initialCanvasData?.objects) {
+        initCanvas
+          .loadFromJSON(initialCanvasData) // Directly use the JSON object
+          .then(() => {
+            console.log("Canvas successfully loaded.");
+            initCanvas.requestRenderAll(); // Ensure rendering happens after loading
+          })
+          .catch((error) => {
+            console.error("Error loading canvas JSON:", error);
+          });
+      } else {
+        console.warn("No valid initialCanvasData provided.");
+        initCanvas.requestRenderAll(); // Render an empty canvas
+      }
+
       setCanvas(initCanvas);
+
       return () => {
         initCanvas.dispose();
       };
     }
-  }, []);
+  }, [initialCanvasData]);
 
   const addRectangle = () => {
     if (canvas) {
@@ -104,23 +126,19 @@ export default function Toolbar() {
           onClick={addRectangle}
           variant="outlined"
           startIcon={<FaSquare />}
-        ></Button>
-        <Button
-          onClick={addCircle}
-          variant="outlined"
-          startIcon={<FaCircle />}
-        ></Button>
-        <Button
-          onClick={addText}
-          variant="outlined"
-          startIcon={<FaFont />}
-        ></Button>
+        >
+          Add Rectangle
+        </Button>
+        <Button onClick={addCircle} variant="outlined" startIcon={<FaCircle />}>
+          Add Circle
+        </Button>
+        <Button onClick={addText} variant="outlined" startIcon={<FaFont />}>
+          Add Text
+        </Button>
         <Image canvas={canvas} canvasRef={canvasRef} />
-        <Button
-          onClick={saveCanvas}
-          variant="contained"
-          startIcon={<FaSave />}
-        ></Button>
+        <Button onClick={saveCanvas} variant="contained" startIcon={<FaSave />}>
+          Save Canvas
+        </Button>
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />

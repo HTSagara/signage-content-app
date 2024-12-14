@@ -1,23 +1,6 @@
 // ./src/styles/styles.scss
-body {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 .button {
   width: max-content;
-}
-.App {
-  font-family: sans-serif;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  padding: 100px 16px;
-  background-color: var(--gray-200);
-  min-height: 100vh;
-  height: 100%;
 }
 #canvas {
   border: 1px solid var(--border-neutral-subtle);

@@ -48,7 +48,7 @@ export default function Settings({ canvas }) {
   };
 
   return (
-    <div className="Settings darkmode">
+    <div className="Settings">
       {selectedObject && selectedObject.type === "rect" && (
         <>
           <TextField
