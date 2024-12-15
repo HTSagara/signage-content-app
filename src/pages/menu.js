@@ -2,6 +2,7 @@ import Navbar from "@/app/components/navbar/navbar";
 import Link from "next/link";
 import path from "path";
 import fs from "fs/promises";
+import "@/styles/styles.scss";
 
 export async function getStaticProps() {
   const filePath = path.join(

@@ -3,6 +3,7 @@ import path from "path";
 import fs from "fs/promises";
 import "@/styles/styles.scss";
 import Navbar from "@/app/components/navbar/navbar";
+import styles from "./name.module.scss"; // Import the SCSS module
 
 export async function getServerSideProps(context) {
   const { name } = context.params;
@@ -12,17 +13,13 @@ export async function getServerSideProps(context) {
 
   try {
     const fileData = await fs.readFile(filePath, "utf8");
-    console.log("File data:", fileData); // Debug log
     const canvases = JSON.parse(fileData);
-    console.log("Parsed canvases:", canvases); // Debug log
     canvasData = canvases.find((canvas) => canvas.name === name) || null;
-    console.log("Found canvasData:", canvasData); // Debug log
   } catch (error) {
     console.error("Error reading memory-db.json:", error);
   }
 
   if (!canvasData) {
-    console.error(`Canvas with name "${name}" not found.`);
     return { notFound: true };
   }
 
@@ -39,7 +36,9 @@ export default function CanvasPage({ canvasData }) {
   }
 
   return (
-    <div>
+    <div className={styles.page}>
+      {" "}
+      {/* Apply the styles here */}
       <Navbar />
       <div className="App">
         <Toolbar initialCanvasData={canvasData.content} />

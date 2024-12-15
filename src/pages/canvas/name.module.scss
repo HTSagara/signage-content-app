@@ -1,0 +1,10 @@
+// src/pages/canvas/name.module.scss
+.page {
+  background-color: black;
+  min-height: 100vh; /* Ensure the background covers the entire viewport */
+  color: white; /* Optional: Ensure text is visible on a dark background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
