@@ -1,3 +1,4 @@
+// src/app/page.js
 "use client";
 import Image from "next/image";
 import React, { useEffect, useRef, useState } from "react";

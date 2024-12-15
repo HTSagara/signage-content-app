@@ -2,6 +2,7 @@ import Toolbar from "@/app/components/canvas/toolbar";
 import path from "path";
 import fs from "fs/promises";
 import "@/styles/styles.scss";
+import Navbar from "@/app/components/navbar/navbar";
 
 export async function getServerSideProps(context) {
   const { name } = context.params;
@@ -38,8 +39,11 @@ export default function CanvasPage({ canvasData }) {
   }
 
   return (
-    <div className="App">
-      <Toolbar initialCanvasData={canvasData.content} />
+    <div>
+      <Navbar />
+      <div className="App">
+        <Toolbar initialCanvasData={canvasData.content} />
+      </div>
     </div>
   );
 }
