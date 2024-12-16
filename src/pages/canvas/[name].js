@@ -1,9 +1,10 @@
+// src/pages/canvas/[name].js
 import Toolbar from "@/app/components/canvas/toolbar";
 import path from "path";
 import fs from "fs/promises";
 import "@/styles/styles.scss";
 import Navbar from "@/app/components/navbar/navbar";
-import styles from "./name.module.scss"; // Import the SCSS module
+import styles from "./name.module.scss";
 
 export async function getServerSideProps(context) {
   const { name } = context.params;
@@ -41,7 +42,7 @@ export default function CanvasPage({ canvasData }) {
       {/* Apply the styles here */}
       <Navbar />
       <div className="App">
-        <Toolbar initialCanvasData={canvasData.content} />
+        <Toolbar initialCanvasData={canvasData} />
       </div>
     </div>
   );

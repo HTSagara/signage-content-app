@@ -1,20 +1,10 @@
 // ./src/styles/styles.scss
-.button {
-  width: max-content;
-}
-#canvas {
-  border: 1px solid var(--border-neutral-subtle);
-  z-index: 2;
-}
-.lower-canvas {
-  position: initial !important;
-}
-
+// Styling for the Toolbar and Checkbox
 .Toolbar {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  background-color: transparent; // Ensure the Toolbar itself has a transparent background
+  background-color: transparent; // Transparent background
   padding: 8px 8px;
   border-radius: 4px;
   position: fixed;
@@ -22,63 +12,39 @@
   transform: translateY(-50%);
   left: 16px;
 
-  button {
-    background-color: transparent; // Transparent background
-    color: white; // White text
-    border: 1px solid white; // White border
-    border-radius: 4px;
-    text-transform: uppercase;
-    padding: 8px 12px;
-    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  // Style the Material-UI Checkbox
+  .MuiCheckbox-root {
+    color: white !important; // White outline and checkmark
+    transition: all 0.3s ease;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.2); // Slight white tint on hover
-      color: #ffffff; // Ensures text remains white
-      border-color: #ffffff; // Ensures border remains white
+      background-color: rgba(255, 255, 255, 0.1); // Light white tint on hover
     }
+  }
 
-    // Handle icons within buttons
-    .MuiButton-icon,
-    .MuiButton-startIcon {
-      color: white;
-    }
+  // Ensure the checkbox outline is visible when unchecked
+  .Mui-checked {
+    color: white !important; // Checked state in white
   }
 }
 
-.Settings {
-  position: fixed;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 24px 8px;
-  border-radius: 4px;
+// Checkbox label color (optional for "Post immediately")
+.MuiFormControlLabel-label {
+  color: white !important;
+}
 
-  // Transparent background
+// Style for buttons (to maintain consistency)
+button {
   background-color: transparent;
+  color: white;
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 8px 12px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
 
-  // White text and input styles
-  * {
-    color: white;
-    border-color: white;
-  }
-
-  // Target Material-UI TextFields specifically
-  .MuiOutlinedInput-root {
-    fieldset {
-      border-color: white;
-    }
-    &:hover fieldset {
-      border-color: white;
-    }
-    &.Mui-focused fieldset {
-      border-color: white;
-    }
-  }
-
-  .MuiInputLabel-root {
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
     color: white;
   }
 }

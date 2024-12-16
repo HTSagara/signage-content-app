@@ -3,6 +3,7 @@ import Link from "next/link";
 import path from "path";
 import fs from "fs/promises";
 import "@/styles/styles.scss";
+import { useState } from "react";
 
 export async function getStaticProps() {
   const filePath = path.join(
@@ -27,6 +28,37 @@ export async function getStaticProps() {
 }
 
 export default function Menu({ canvasList }) {
+  const [canvases, setCanvases] = useState(canvasList);
+
+  // Function to post a draft canvas
+  const postCanvas = async (name) => {
+    try {
+      const response = await fetch("/api/updateCanvasStatus", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name, status: "posted" }),
+      });
+
+      if (response.ok) {
+        alert("Canvas updated to posted!");
+        // Update the local state to reflect the change
+        setCanvases((prevCanvases) =>
+          prevCanvases.map((canvas) =>
+            canvas.name === name ? { ...canvas, status: "posted" } : canvas
+          )
+        );
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to update canvas: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error updating canvas status:", error);
+      alert("An error occurred while updating the canvas.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -35,9 +67,9 @@ export default function Menu({ canvasList }) {
           <h1>Saved Canvases</h1>
         </header>
         <main>
-          {canvasList.length > 0 ? (
+          {canvases.length > 0 ? (
             <ul>
-              {canvasList.map((canvas, index) => (
+              {canvases.map((canvas, index) => (
                 <li key={index} className="CanvasItem">
                   <div>
                     <h3>{canvas.name}</h3>
@@ -57,7 +89,12 @@ export default function Menu({ canvasList }) {
                     <Link href={`/canvas/${canvas.name}`}>
                       <button>Edit</button>
                     </Link>
-                    <button>Post</button>
+                    <button
+                      onClick={() => postCanvas(canvas.name)}
+                      disabled={canvas.status === "posted"}
+                    >
+                      {canvas.status === "posted" ? "Posted" : "Post"}
+                    </button>
                   </div>
                 </li>
               ))}
@@ -108,10 +145,16 @@ export default function Menu({ canvasList }) {
             padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
+            margin-left: 8px;
           }
 
           button:hover {
             background: #3700b3;
+          }
+
+          button:disabled {
+            background: #bdbdbd;
+            cursor: not-allowed;
           }
         `}</style>
       </div>

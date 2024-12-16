@@ -27,13 +27,20 @@ export default function Toolbar({ initialCanvasData }) {
       // Log initialCanvasData for debugging
       console.log("Initial Canvas Data:", initialCanvasData);
 
+      // Set checkbox state based on status
+      if (initialCanvasData?.status === "posted") {
+        console.log("status: " + initialCanvasData?.status);
+        setPostImmediately(true); // Set the checkbox to checked if status is 'posted'
+      }
+
       // Load existing canvas data if available
-      if (initialCanvasData?.objects) {
+      if (initialCanvasData?.content.objects) {
         initCanvas
-          .loadFromJSON(initialCanvasData) // Directly use the JSON object
+          .loadFromJSON(initialCanvasData.content) // Directly use the JSON object
           .then(() => {
             console.log("Canvas successfully loaded.");
             initCanvas.requestRenderAll(); // Ensure rendering happens after loading
+            console.log(initCanvas);
           })
           .catch((error) => {
             console.error("Error loading canvas JSON:", error);
@@ -158,7 +165,7 @@ export default function Toolbar({ initialCanvasData }) {
               onChange={(e) => setPostImmediately(e.target.checked)}
             />
           }
-          label="Post immediately"
+          label="Post"
         />
       </div>
       <canvas id="canvas" ref={canvasRef} />
