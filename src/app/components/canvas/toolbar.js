@@ -126,19 +126,23 @@ export default function Toolbar({ initialCanvasData }) {
           onClick={addRectangle}
           variant="outlined"
           startIcon={<FaSquare />}
-        >
-          Add Rectangle
-        </Button>
-        <Button onClick={addCircle} variant="outlined" startIcon={<FaCircle />}>
-          Add Circle
-        </Button>
-        <Button onClick={addText} variant="outlined" startIcon={<FaFont />}>
-          Add Text
-        </Button>
+        ></Button>
+        <Button
+          onClick={addCircle}
+          variant="outlined"
+          startIcon={<FaCircle />}
+        ></Button>
+        <Button
+          onClick={addText}
+          variant="outlined"
+          startIcon={<FaFont />}
+        ></Button>
         <Image canvas={canvas} canvasRef={canvasRef} />
-        <Button onClick={saveCanvas} variant="contained" startIcon={<FaSave />}>
-          Save Canvas
-        </Button>
+        <Button
+          onClick={saveCanvas}
+          variant="contained"
+          startIcon={<FaSave />}
+        ></Button>
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />

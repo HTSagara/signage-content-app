@@ -45,7 +45,7 @@ export default function Menu({ canvasList }) {
                   </div>
                   <div>
                     <Link href={`/canvas/${canvas.name}`}>
-                      <button>Load</button>
+                      <button>Edit</button>
                     </Link>
                   </div>
                 </li>
@@ -55,11 +55,6 @@ export default function Menu({ canvasList }) {
             <p>No canvases found. Start by creating one!</p>
           )}
         </main>
-        <footer>
-          <Link href="/">
-            <button>Back to Home</button>
-          </Link>
-        </footer>
 
         <style jsx>{`
           .Menu {

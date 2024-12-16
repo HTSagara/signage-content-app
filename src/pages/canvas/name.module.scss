@@ -8,3 +8,76 @@
   align-items: center;
   justify-content: flex-start;
 }
+
+.Toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: transparent; // Ensure the Toolbar itself has a transparent background
+  padding: 8px 8px;
+  border-radius: 4px;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 16px;
+
+  button {
+    background-color: transparent; // Transparent background
+    color: white; // White text
+    border: 1px solid white; // White border
+    border-radius: 4px;
+    text-transform: uppercase;
+    padding: 8px 12px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.2); // Slight white tint on hover
+      color: #ffffff; // Ensures text remains white
+      border-color: #ffffff; // Ensures border remains white
+    }
+
+    // Handle icons within buttons
+    .MuiButton-icon,
+    .MuiButton-startIcon {
+      color: white;
+    }
+  }
+}
+
+.Settings {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px 8px;
+  border-radius: 4px;
+
+  // Transparent background
+  background-color: transparent;
+
+  // White text and input styles
+  * {
+    color: white;
+    border-color: white;
+  }
+
+  // Target Material-UI TextFields specifically
+  .MuiOutlinedInput-root {
+    fieldset {
+      border-color: white;
+    }
+    &:hover fieldset {
+      border-color: white;
+    }
+    &.Mui-focused fieldset {
+      border-color: white;
+    }
+  }
+
+  .MuiInputLabel-root {
+    color: white;
+  }
+}
