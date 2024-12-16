@@ -1,29 +1,27 @@
 import Navbar from "@/app/components/navbar/navbar";
 import Link from "next/link";
-import path from "path";
-import fs from "fs/promises";
 import "@/styles/styles.scss";
 import { useState } from "react";
+import { MongoClient } from "mongodb";
 
 export async function getStaticProps() {
-  const filePath = path.join(
-    process.cwd(),
-    "src",
-    "app",
-    "database",
-    "memory-db.json"
-  );
+  const client = new MongoClient(process.env.MONGODB_URI);
 
   let canvasList = [];
   try {
-    const fileData = await fs.readFile(filePath, "utf8");
-    canvasList = JSON.parse(fileData);
+    await client.connect();
+    const db = client.db("canvasDatabase");
+    const collection = db.collection("canvases");
+
+    canvasList = await collection.find({}).toArray();
   } catch (error) {
-    console.error("Error reading memory-db.json:", error);
+    console.error("Error fetching canvases:", error);
+  } finally {
+    await client.close();
   }
 
   return {
-    props: { canvasList },
+    props: { canvasList: JSON.parse(JSON.stringify(canvasList)) }, // Ensure serializable data
   };
 }
 

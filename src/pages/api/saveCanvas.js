@@ -1,32 +1,40 @@
-// src/app/pages/api/saveCanvas.js
-import fs from "fs/promises";
-import path from "path";
+// src/pages/api/saveCanvas.js
+import { MongoClient } from "mongodb";
+
+const uri = process.env.MONGODB_URI;
+const client = new MongoClient(uri);
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
     const { name, content, status } = req.body;
+
     if (!name || !content) {
-      res.status(400).json({ error: "Canvas name and content are required" });
-      return;
+      return res
+        .status(400)
+        .json({ error: "Canvas name and content are required" });
     }
 
-    const filePath = path.resolve("./src/app/database/memory-db.json");
-
     try {
-      // Read the existing data from memory-db.json
-      const fileData = await fs.readFile(filePath, "utf8");
-      const jsonData = fileData ? JSON.parse(fileData) : [];
+      await client.connect();
+      const db = client.db("canvasDatabase");
+      const collection = db.collection("canvases");
 
-      // Append the new canvas data with the status
-      jsonData.push({ name, content, status });
-
-      // Write the updated data back to the file
-      await fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), "utf8");
+      // Check if a canvas with the same name exists
+      const existingCanvas = await collection.findOne({ name });
+      if (existingCanvas) {
+        // Update existing canvas
+        await collection.updateOne({ name }, { $set: { content, status } });
+      } else {
+        // Insert a new canvas
+        await collection.insertOne({ name, content, status });
+      }
 
       res.status(200).json({ message: "Canvas saved successfully!" });
     } catch (error) {
       console.error("Error saving canvas:", error);
       res.status(500).json({ error: "Failed to save canvas" });
+    } finally {
+      await client.close();
     }
   } else {
     res.status(405).json({ error: "Method not allowed" });
