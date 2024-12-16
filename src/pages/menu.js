@@ -43,7 +43,6 @@ export default function Menu({ canvasList }) {
 
       if (response.ok) {
         alert("Canvas updated to posted!");
-        // Update the local state to reflect the change
         setCanvases((prevCanvases) =>
           prevCanvases.map((canvas) =>
             canvas.name === name ? { ...canvas, status: "posted" } : canvas
@@ -56,6 +55,32 @@ export default function Menu({ canvasList }) {
     } catch (error) {
       console.error("Error updating canvas status:", error);
       alert("An error occurred while updating the canvas.");
+    }
+  };
+
+  // Function to delete a canvas
+  const deleteCanvas = async (name) => {
+    try {
+      const response = await fetch("/api/deleteCanvas", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name }),
+      });
+
+      if (response.ok) {
+        alert("Canvas deleted successfully!");
+        setCanvases((prevCanvases) =>
+          prevCanvases.filter((canvas) => canvas.name !== name)
+        );
+      } else {
+        const errorData = await response.json();
+        alert(`Failed to delete canvas: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error deleting canvas:", error);
+      alert("An error occurred while deleting the canvas.");
     }
   };
 
@@ -94,6 +119,9 @@ export default function Menu({ canvasList }) {
                       disabled={canvas.status === "posted"}
                     >
                       {canvas.status === "posted" ? "Posted" : "Post"}
+                    </button>
+                    <button onClick={() => deleteCanvas(canvas.name)}>
+                      Delete
                     </button>
                   </div>
                 </li>
