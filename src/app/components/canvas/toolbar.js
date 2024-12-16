@@ -4,6 +4,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
 import { FaSquare, FaCircle, FaFont, FaSave } from "react-icons/fa"; // Icons
 import Button from "@mui/material/Button"; // Material-UI Button
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Checkbox from "@mui/material/Checkbox";
 import "./styles.scss";
 import Settings from "./settings";
 import Image from "./image";
@@ -11,6 +13,7 @@ import Image from "./image";
 export default function Toolbar({ initialCanvasData }) {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
+  const [postImmediately, setPostImmediately] = useState(false);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -104,7 +107,11 @@ export default function Toolbar({ initialCanvasData }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name: canvasName, content: canvasJSON }),
+        body: JSON.stringify({
+          name: canvasName,
+          content: canvasJSON,
+          status: postImmediately ? "posted" : "draft", // Persist checkbox status
+        }),
       });
 
       if (response.ok) {
@@ -143,6 +150,16 @@ export default function Toolbar({ initialCanvasData }) {
           variant="contained"
           startIcon={<FaSave />}
         ></Button>
+
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={postImmediately}
+              onChange={(e) => setPostImmediately(e.target.checked)}
+            />
+          }
+          label="Post immediately"
+        />
       </div>
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />

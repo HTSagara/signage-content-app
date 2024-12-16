@@ -4,26 +4,25 @@ import path from "path";
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { name, content } = req.body;
-
+    const { name, content, status } = req.body;
     if (!name || !content) {
       res.status(400).json({ error: "Canvas name and content are required" });
       return;
     }
 
-    // Define the file path
     const filePath = path.resolve("./src/app/database/memory-db.json");
 
     try {
-      // Read existing data
+      // Read the existing data from memory-db.json
       const fileData = await fs.readFile(filePath, "utf8");
       const jsonData = fileData ? JSON.parse(fileData) : [];
 
-      // Append new canvas data
-      jsonData.push({ name, content });
+      // Append the new canvas data with the status
+      jsonData.push({ name, content, status });
 
-      // Write updated data back to the file
+      // Write the updated data back to the file
       await fs.writeFile(filePath, JSON.stringify(jsonData, null, 2), "utf8");
+
       res.status(200).json({ message: "Canvas saved successfully!" });
     } catch (error) {
       console.error("Error saving canvas:", error);

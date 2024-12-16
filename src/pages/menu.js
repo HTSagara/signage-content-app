@@ -42,11 +42,22 @@ export default function Menu({ canvasList }) {
                   <div>
                     <h3>{canvas.name}</h3>
                     <p>Objects: {canvas.content.objects.length}</p>
+                    <p>
+                      Status:{" "}
+                      <span
+                        className={`status ${
+                          canvas.status === "posted" ? "posted" : "draft"
+                        }`}
+                      >
+                        {canvas.status || "draft"}
+                      </span>
+                    </p>
                   </div>
                   <div>
                     <Link href={`/canvas/${canvas.name}`}>
                       <button>Edit</button>
                     </Link>
+                    <button>Post</button>
                   </div>
                 </li>
               ))}
@@ -76,6 +87,18 @@ export default function Menu({ canvasList }) {
             border: 1px solid #ddd;
             margin-bottom: 10px;
             border-radius: 5px;
+          }
+
+          .status {
+            font-weight: bold;
+          }
+
+          .status.posted {
+            color: green;
+          }
+
+          .status.draft {
+            color: orange;
           }
 
           button {
