@@ -136,7 +136,7 @@ For any further questions, feel free to reach out or explore the deployed app: [
 
 ## References
 
-[Fabric.js](https://fabricjs.com/)
-[Fabric.js Video Tutorial](https://www.youtube.com/watch?v=eSiEBH7D1mM&list=PLOmd6EbLLA_oLtJ9howoPC01788f1dtEz)
-[Electron.js](https://www.electronjs.org/docs/latest/tutorial/quick-start)
-[Electron Video Tutorial](https://www.youtube.com/watch?v=ONpVol7B7AY)
+- [Fabric.js](https://fabricjs.com/)
+- [Fabric.js Video Tutorial](https://www.youtube.com/watch?v=eSiEBH7D1mM&list=PLOmd6EbLLA_oLtJ9howoPC01788f1dtEz)
+- [Electron.js](https://www.electronjs.org/docs/latest/tutorial/quick-start)
+- [Electron Video Tutorial](https://www.youtube.com/watch?v=ONpVol7B7AY)
