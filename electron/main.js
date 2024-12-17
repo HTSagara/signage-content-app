@@ -1,13 +1,10 @@
-const WebSocket = require("ws");
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
-const { ipcMain } = require("electron");
+const WebSocket = require("ws");
 
 let mainWindow;
 
 async function createWindow() {
-  const isDev = (await import("electron-is-dev")).default;
-
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -17,8 +14,12 @@ async function createWindow() {
     },
   });
 
-  // Connect to WebSocket server
-  const ws = new WebSocket("ws://localhost:3000");
+  // Load the deployed Next.js app
+  const deployedAppURL = "https://signage-content-web-app.vercel.app/";
+  mainWindow.loadURL(deployedAppURL);
+
+  // Connect to the WebSocket server
+  const ws = new WebSocket("ws://localhost:3001");
 
   ws.on("open", () => {
     console.log("Connected to WebSocket server");
@@ -30,34 +31,18 @@ async function createWindow() {
     mainWindow.webContents.send("canvas-update", JSON.parse(data));
   });
 
-  mainWindow.loadURL(
-    isDev
-      ? "http://localhost:3000"
-      : `file://${path.join(__dirname, "../build/index.html")}`
-  );
+  ws.on("error", (error) => {
+    console.error("WebSocket error:", error);
+  });
 
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
+  ws.on("close", () => {
+    console.log("WebSocket connection closed.");
+  });
 
-  mainWindow.on("closed", () => (mainWindow = null));
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+    ws.close();
+  });
 }
 
 app.on("ready", createWindow);
-
-app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
-});
-
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-ipcMain.on("save-canvas", (event, canvasData) => {
-  console.log("Received canvas data:", canvasData);
-  // Handle saving or processing the canvas data in Electron
-});
