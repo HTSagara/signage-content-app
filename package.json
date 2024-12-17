@@ -2,11 +2,15 @@
   "name": "signage-content-app",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron": "electron .",
+    "electron-build": "electron-builder",
+    "electron-start": "electron ."
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
