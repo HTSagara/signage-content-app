@@ -35,8 +35,19 @@ export default function Toolbar({ initialCanvasData }) {
 
       // Load existing canvas data if available
       if (initialCanvasData?.content.objects) {
+        // Ensure images are loaded with valid URLs
+        const canvasJSON = {
+          ...initialCanvasData.content,
+          objects: initialCanvasData.content.objects.map((obj) => {
+            if (obj.type === "image" && obj.src.startsWith("blob:")) {
+              obj.src = "/uploads/default-image.png"; // Replace invalid URLs with defaults
+            }
+            return obj;
+          }),
+        };
+
         initCanvas
-          .loadFromJSON(initialCanvasData.content) // Directly use the JSON object
+          .loadFromJSON(canvasJSON) // Directly use the JSON object
           .then(() => {
             console.log("Canvas successfully loaded.");
             initCanvas.requestRenderAll(); // Ensure rendering happens after loading
@@ -107,29 +118,92 @@ export default function Toolbar({ initialCanvasData }) {
       return;
     }
 
-    const canvasJSON = canvas.toJSON();
     try {
+      const objects = canvas.getObjects();
+      const imageUploadPromises = [];
+
+      // Step 1: Replace blob URLs with Cloudinary URLs
+      objects.forEach((obj) => {
+        if (obj.type === "image" && obj._element) {
+          const imageElement = obj._element;
+
+          const promise = new Promise((resolve, reject) => {
+            // Create a temporary canvas to extract the image data
+            const tempCanvas = document.createElement("canvas");
+            const context = tempCanvas.getContext("2d");
+
+            tempCanvas.width = imageElement.naturalWidth || imageElement.width;
+            tempCanvas.height =
+              imageElement.naturalHeight || imageElement.height;
+
+            context.drawImage(imageElement, 0, 0);
+
+            // Convert to Blob and upload to Cloudinary
+            tempCanvas.toBlob(async (blob) => {
+              if (!blob) {
+                console.error("Failed to create image blob");
+                return reject("Failed to create image blob");
+              }
+
+              const formData = new FormData();
+              formData.append("file", blob);
+
+              // Upload the image to Cloudinary
+              try {
+                const uploadResponse = await fetch("/api/uploadImage", {
+                  method: "POST",
+                  body: formData,
+                });
+
+                const uploadResult = await uploadResponse.json();
+
+                if (uploadResponse.ok) {
+                  console.log("Uploaded image URL:", uploadResult.url);
+                  obj.set("src", uploadResult.url); // Replace the src with the Cloudinary URL
+                  obj._element.src = uploadResult.url;
+                  console.log("Uploaded src", obj._element.src);
+                  resolve();
+                } else {
+                  console.error("Failed to upload image:", uploadResult.error);
+                  reject(uploadResult.error);
+                }
+              } catch (error) {
+                console.error("Error uploading image:", error);
+                reject(error);
+              }
+            }, "image/png");
+          });
+
+          imageUploadPromises.push(promise);
+        }
+      });
+
+      // Wait for all image uploads to complete
+      await Promise.all(imageUploadPromises);
+
+      // Step 2: Convert canvas to JSON
+      const canvasJSON = canvas.toJSON();
+
+      // Step 3: Save canvas JSON to the database
       const response = await fetch("/api/saveCanvas", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: canvasName,
           content: canvasJSON,
-          status: postImmediately ? "posted" : "draft", // Persist checkbox status
+          status: postImmediately ? "posted" : "draft",
         }),
       });
 
       if (response.ok) {
-        alert("Canvas saved successfully!");
+        alert("Canvas and images saved successfully!");
       } else {
         const errorData = await response.json();
         alert(`Failed to save canvas: ${errorData.error}`);
       }
     } catch (error) {
-      console.error("Error saving canvas:", error);
-      alert("An error occurred while saving the canvas.");
+      console.error("Error saving canvas or images:", error);
+      alert("An error occurred while saving.");
     }
   };
 

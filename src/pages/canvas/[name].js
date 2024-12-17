@@ -1,23 +1,35 @@
 // src/pages/canvas/[name].js
 import Toolbar from "@/app/components/canvas/toolbar";
-import path from "path";
-import fs from "fs/promises";
 import "@/styles/styles.scss";
 import Navbar from "@/app/components/navbar/navbar";
 import styles from "./name.module.scss";
+import { MongoClient } from "mongodb";
 
 export async function getServerSideProps(context) {
   const { name } = context.params;
 
-  const filePath = path.join(process.cwd(), "src/app/database/memory-db.json");
+  // MongoDB connection URI
+  const uri = process.env.MONGODB_URI;
+  const client = new MongoClient(uri);
+
   let canvasData = null;
 
   try {
-    const fileData = await fs.readFile(filePath, "utf8");
-    const canvases = JSON.parse(fileData);
-    canvasData = canvases.find((canvas) => canvas.name === name) || null;
+    // Connect to the database
+    await client.connect();
+    const db = client.db("canvasDatabase");
+    const collection = db.collection("canvases");
+
+    // Find the canvas by name
+    canvasData = await collection.findOne({ name });
+
+    if (canvasData) {
+      canvasData = JSON.parse(JSON.stringify(canvasData)); // Serialize for Next.js
+    }
   } catch (error) {
-    console.error("Error reading memory-db.json:", error);
+    console.error("Error fetching canvas data from MongoDB:", error);
+  } finally {
+    await client.close();
   }
 
   if (!canvasData) {
@@ -38,8 +50,6 @@ export default function CanvasPage({ canvasData }) {
 
   return (
     <div className={styles.page}>
-      {" "}
-      {/* Apply the styles here */}
       <Navbar />
       <div className="App">
         <Toolbar initialCanvasData={canvasData} />

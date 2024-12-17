@@ -19,13 +19,10 @@ export default async function handler(req, res) {
       const db = client.db("canvasDatabase");
       const collection = db.collection("canvases");
 
-      // Check if a canvas with the same name exists
       const existingCanvas = await collection.findOne({ name });
       if (existingCanvas) {
-        // Update existing canvas
         await collection.updateOne({ name }, { $set: { content, status } });
       } else {
-        // Insert a new canvas
         await collection.insertOne({ name, content, status });
       }
 
