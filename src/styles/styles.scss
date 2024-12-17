@@ -1,8 +1,11 @@
 // ./src/styles/styles.scss
-body {
+body,
+html {
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
+  background-color: #333333; // Dark grey background
+  color: white; // Ensure text remains visible
+  height: 100%;
 }
 .button {
   width: max-content;

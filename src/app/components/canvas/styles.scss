@@ -1,4 +1,15 @@
 // ./src/styles/styles.scss
+
+// Global background color
+body,
+html {
+  margin: 0;
+  padding: 0;
+  background-color: #333333; // Dark grey background
+  color: white; // Ensure text remains visible
+  height: 100%;
+}
+
 // Styling for the Toolbar and Checkbox
 .Toolbar {
   display: flex;
@@ -22,18 +33,15 @@
     }
   }
 
-  // Ensure the checkbox outline is visible when unchecked
   .Mui-checked {
     color: white !important; // Checked state in white
   }
 }
 
-// Checkbox label color (optional for "Post immediately")
 .MuiFormControlLabel-label {
   color: white !important;
 }
 
-// Style for buttons (to maintain consistency)
 button {
   background-color: transparent;
   color: white;
@@ -60,16 +68,13 @@ button {
   padding: 24px 8px;
   border-radius: 4px;
 
-  // Transparent background
   background-color: transparent;
 
-  // White text and input styles
   * {
     color: white;
     border-color: white;
   }
 
-  // Target Material-UI TextFields specifically
   .MuiOutlinedInput-root {
     fieldset {
       border-color: white;
