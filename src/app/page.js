@@ -8,7 +8,9 @@ import Toolbar from "./components/canvas/toolbar";
 export default function Home() {
   return (
     <div className="App">
-      <Toolbar />
+      <div className="canvas-container">
+        <Toolbar />
+      </div>
     </div>
   );
 }

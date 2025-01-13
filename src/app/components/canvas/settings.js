@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import TextField from "@mui/material/TextField";
+import { Typography } from "@mui/material";
 
 export default function Settings({ canvas }) {
   const [selectedObject, setSelectedObject] = useState(null);
@@ -49,42 +50,77 @@ export default function Settings({ canvas }) {
 
   return (
     <div className="Settings">
+      <Typography variant="h6" sx={{ color: "var(--text-primary)", mb: 2 }}>
+        Object Settings
+      </Typography>
+
       {selectedObject && selectedObject.type === "rect" && (
         <>
           <TextField
+            fullWidth
             label="Width"
             value={width}
+            type="number"
             onChange={(e) => {
               setWidth(e.target.value);
               updateObject("width", parseInt(e.target.value, 10));
             }}
+            InputProps={{
+              inputProps: { min: 1 },
+            }}
           />
           <TextField
+            fullWidth
             label="Height"
             value={height}
+            type="number"
             onChange={(e) => {
               setHeight(e.target.value);
               updateObject("height", parseInt(e.target.value, 10));
             }}
+            InputProps={{
+              inputProps: { min: 1 },
+            }}
           />
         </>
       )}
+
       {selectedObject && selectedObject.type === "circle" && (
         <TextField
+          fullWidth
           label="Diameter"
           value={diameter}
+          type="number"
           onChange={(e) => {
             setDiameter(e.target.value);
             updateObject("radius", parseInt(e.target.value, 10) / 2);
           }}
+          InputProps={{
+            inputProps: { min: 1 },
+          }}
         />
       )}
+
       <TextField
+        fullWidth
         label="Color"
         value={color}
         onChange={(e) => {
           setColor(e.target.value);
           updateObject("fill", e.target.value);
+        }}
+        InputProps={{
+          endAdornment: (
+            <div
+              style={{
+                width: 20,
+                height: 20,
+                backgroundColor: color,
+                borderRadius: 4,
+                border: "1px solid var(--border-color)",
+              }}
+            />
+          ),
         }}
       />
     </div>
