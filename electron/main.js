@@ -1,22 +1,48 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const WebSocket = require("ws");
+const dns = require("dns").promises;
 
 let mainWindow;
 
+async function isInternetConnected() {
+  try {
+    // Check if DNS resolution works
+    await dns.lookup("example.com");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 1000,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
   });
 
-  // Load the deployed Next.js app
   const deployedAppURL = "https://signage-content-web-app.vercel.app/";
-  mainWindow.loadURL(deployedAppURL);
+  const localAppURL = "http://localhost:3000";
+
+  // Check for internet connection
+  const isOnline = await isInternetConnected();
+
+  if (isOnline) {
+    console.log("Internet connection detected. Loading deployed app...");
+    mainWindow.loadURL(deployedAppURL).catch(() => {
+      console.error(
+        "Failed to load deployed app. Falling back to local app..."
+      );
+      mainWindow.loadURL(localAppURL);
+    });
+  } else {
+    console.log("No internet connection detected. Loading local app...");
+    mainWindow.loadURL(localAppURL);
+  }
 
   // Connect to the WebSocket server
   const ws = new WebSocket("ws://localhost:3001");
@@ -46,3 +72,15 @@ async function createWindow() {
 }
 
 app.on("ready", createWindow);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
