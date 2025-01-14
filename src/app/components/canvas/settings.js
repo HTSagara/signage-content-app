@@ -50,9 +50,10 @@ export default function Settings({ canvas }) {
 
   return (
     <div className="Settings">
-      <Typography variant="h6" sx={{ color: "var(--text-primary)", mb: 2 }}>
-        Object Settings
-      </Typography>
+      <Typography
+        variant="h6"
+        sx={{ color: "var(--text-primary)", mb: 2 }}
+      ></Typography>
 
       {selectedObject && selectedObject.type === "rect" && (
         <>
