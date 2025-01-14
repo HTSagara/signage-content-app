@@ -1,118 +1,166 @@
-// ./src/styles/styles.scss
+:root {
+  --primary-bg: #1a1a1a;
+  --secondary-bg: #2d2d2d;
+  --accent-color: #007bff;
+  --text-primary: #ffffff;
+  --text-secondary: #b3b3b3;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --transition: all 0.3s ease;
+  --navbar-height: 60px;
+}
+
 body,
 html {
   margin: 0;
   padding: 0;
-  background-color: #333333; // Dark grey background
-  color: white; // Ensure text remains visible
-  height: 100%;
+  background-color: var(--primary-bg);
+  color: var(--text-primary);
+  height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
 }
-.button {
-  width: max-content;
+
+.main-content {
+  padding: 20px;
+  height: calc(100vh - 60px);
 }
+
 .App {
-  font-family: sans-serif;
-  text-align: center;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  flex-direction: column;
-  padding: 100px 16px;
-  background-color: var(--gray-200);
-  min-height: 100vh;
-  height: 100%;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100%; /* Ensure the full height is used */
+  position: relative;
 }
-#canvas {
-  border: 1px solid var(--border-neutral-subtle);
-  z-index: 2;
-}
-.lower-canvas {
-  position: initial !important;
+
+.canvas-container {
+  width: 90%; /* Responsive width */
+  max-width: 1200px; /* Set a maximum width for large screens */
+  height: 80%; /* Responsive height */
+  max-height: 800px; /* Set a maximum height for large screens */
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex; /* Optional: Flex container if you need content alignment inside */
+  justify-content: center; /* Center inner content horizontally */
+  align-items: center; /* Center inner content vertically */
 }
 
 .Toolbar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  background-color: transparent; // Transparent background
-  padding: 8px 8px;
-  border-radius: 4px;
+  gap: 12px;
+  background-color: var(--secondary-bg);
+  padding: 16px;
+  border-radius: 8px;
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  left: 16px;
-
-  // Style the Material-UI Checkbox
-  .MuiCheckbox-root {
-    color: white !important; // White outline and checkmark
-    transition: all 0.3s ease;
-
-    &:hover {
-      background-color: rgba(255, 255, 255, 0.1); // Light white tint on hover
-    }
-  }
-
-  // Ensure the checkbox outline is visible when unchecked
-  .Mui-checked {
-    color: white !important; // Checked state in white
-  }
-}
-
-// Checkbox label color (optional for "Post immediately")
-.MuiFormControlLabel-label {
-  color: white !important;
-}
-
-// Style for buttons (to maintain consistency)
-button {
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  border-radius: 4px;
-  padding: 8px 12px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
+  left: 24px;
+  width: 60px; /* Fixed width for toolbar */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000; /* Ensure toolbar stays on top */
 }
 
 .Settings {
   position: fixed;
-  right: 16px;
+  right: 24px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 24px 8px;
-  border-radius: 4px;
+  gap: 16px;
+  padding: 24px;
+  border-radius: 8px;
+  background-color: var(--secondary-bg);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 90px;
 
-  // Transparent background
-  background-color: transparent;
+  .MuiTextField-root {
+    background-color: var(--secondary-bg);
+    border-radius: 6px;
 
-  // White text and input styles
-  * {
-    color: white;
-    border-color: white;
+    .MuiOutlinedInput-root {
+      color: var(--text-primary);
+
+      fieldset {
+        border-color: var(--border-color);
+        transition: var(--transition);
+      }
+
+      &:hover fieldset {
+        border-color: var(--accent-color);
+      }
+
+      &.Mui-focused fieldset {
+        border-color: var(--accent-color);
+      }
+    }
+
+    .MuiInputLabel-root {
+      color: var(--text-secondary);
+
+      &.Mui-focused {
+        color: var(--accent-color);
+      }
+    }
+  }
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1345px) {
+  .Settings {
+    width: 150px;
   }
 
-  // Target Material-UI TextFields specifically
-  .MuiOutlinedInput-root {
-    fieldset {
-      border-color: white;
-    }
-    &:hover fieldset {
-      border-color: white;
-    }
-    &.Mui-focused fieldset {
-      border-color: white;
-    }
+  .canvas-container {
+    width: 100%;
+    height: 70%; /* Reduce height for smaller screens */
+    // margin-left: 8px;
   }
 
-  .MuiInputLabel-root {
-    color: white;
+  .Toolbar {
+    left: 16px;
+  }
+}
+
+@media (max-width: 980px) {
+  .App {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .canvas-container {
+    width: 100%;
+    height: 70%; /* Reduce height for smaller screens */
+    margin: 0 16px; /* Add some horizontal margin */
+  }
+
+  .Toolbar {
+    position: fixed;
+    left: 20%;
+    top: auto;
+    bottom: 16px;
+    transform: translateY(-50%);
+    flex-direction: row;
+    width: 70%;
+    justify-content: space-around;
+    gap: 8px;
+  }
+
+  .Settings {
+    position: fixed;
+    top: 150px; /* Adjusted to avoid overlapping the navbar */
+    left: 8%;
+    width: 70%; /* Full width for responsiveness */
+    height: auto; /* Allow height to adjust dynamically */
+    padding: 16px;
+    margin-left: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    display: flex;
+    flex-direction: row; /* Adjust layout if needed */
+    gap: 8px; /* Adjust spacing between items */
+    z-index: 1000; /* Ensure it's above other components */
   }
 }

@@ -2,11 +2,16 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import { Canvas, Rect, Circle, Textbox } from "fabric";
-import { FaSquare, FaCircle, FaFont, FaSave } from "react-icons/fa"; // Icons
+import { FaSquare, FaCircle, FaFont, FaSave, FaExpand } from "react-icons/fa"; // Icons
 import Button from "@mui/material/Button"; // Material-UI Button
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import "./styles.scss";
+import TextField from "@mui/material/TextField";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import "@/styles/styles.scss";
 import Settings from "./settings";
 import Image from "./image";
 
@@ -14,13 +19,18 @@ export default function Toolbar({ initialCanvasData }) {
   const canvasRef = useRef(null);
   const [canvas, setCanvas] = useState(null);
   const [postImmediately, setPostImmediately] = useState(false);
+  const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
+  const [canvasSize, setCanvasSize] = useState({
+    width: 500,
+    height: 500,
+  });
 
   useEffect(() => {
     if (canvasRef.current) {
       // Initialize Fabric.js Canvas
       const initCanvas = new Canvas(canvasRef.current, {
-        width: 500,
-        height: 500,
+        width: canvasSize.width,
+        height: canvasSize.height,
         backgroundColor: initialCanvasData?.background || "#fff",
       });
 
@@ -67,7 +77,35 @@ export default function Toolbar({ initialCanvasData }) {
         initCanvas.dispose();
       };
     }
-  }, [initialCanvasData]);
+  }, [initialCanvasData, canvasSize]);
+
+  // Add resize handlers
+  const handleResizeDialogOpen = () => {
+    setResizeDialogOpen(true);
+  };
+
+  const handleResizeDialogClose = () => {
+    setResizeDialogOpen(false);
+  };
+
+  const handleResizeCanvas = () => {
+    if (canvas) {
+      // Get the current canvas content
+      const json = canvas.toJSON();
+
+      // Update canvas size
+      canvas.setWidth(canvasSize.width);
+      canvas.setHeight(canvasSize.height);
+
+      // Clear and reload content to maintain proportions
+      canvas.clear();
+      canvas.loadFromJSON(json, () => {
+        canvas.renderAll();
+      });
+
+      setResizeDialogOpen(false);
+    }
+  };
 
   const addRectangle = () => {
     if (canvas) {
@@ -227,6 +265,12 @@ export default function Toolbar({ initialCanvasData }) {
         ></Button>
         <Image canvas={canvas} canvasRef={canvasRef} />
         <Button
+          onClick={handleResizeDialogOpen}
+          variant="outlined"
+          startIcon={<FaExpand />}
+          title="Resize Canvas"
+        ></Button>
+        <Button
           onClick={saveCanvas}
           variant="contained"
           startIcon={<FaSave />}
@@ -242,6 +286,50 @@ export default function Toolbar({ initialCanvasData }) {
           label="Post"
         />
       </div>
+
+      {/* Resize Dialog */}
+      <Dialog open={resizeDialogOpen} onClose={handleResizeDialogClose}>
+        <DialogTitle>Resize Canvas</DialogTitle>
+        <DialogContent>
+          <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
+            <TextField
+              label="Width"
+              type="number"
+              value={canvasSize.width}
+              onChange={(e) =>
+                setCanvasSize((prev) => ({
+                  ...prev,
+                  width: parseInt(e.target.value) || prev.width,
+                }))
+              }
+              InputProps={{
+                inputProps: { min: 1 },
+              }}
+            />
+            <TextField
+              label="Height"
+              type="number"
+              value={canvasSize.height}
+              onChange={(e) =>
+                setCanvasSize((prev) => ({
+                  ...prev,
+                  height: parseInt(e.target.value) || prev.height,
+                }))
+              }
+              InputProps={{
+                inputProps: { min: 1 },
+              }}
+            />
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleResizeDialogClose}>Cancel</Button>
+          <Button onClick={handleResizeCanvas} variant="contained">
+            Resize
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <canvas id="canvas" ref={canvasRef} />
       <Settings canvas={canvas} />
     </div>
