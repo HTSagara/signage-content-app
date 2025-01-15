@@ -20,15 +20,18 @@
     "blocksin-system": "^1.5.9",
     "busboy": "^1.6.0",
     "cloudinary": "^2.5.1",
+    "dns": "^0.2.2",
     "fabric": "^6.5.3",
     "formidable": "^3.5.2",
     "mongodb": "^6.12.0",
     "next": "15.1.0",
     "next-cloudinary": "^6.16.0",
+    "path": "^0.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
-    "sebikostudio-icons": "^1.4.7"
+    "sebikostudio-icons": "^1.4.7",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "electron": "^34.0.0",

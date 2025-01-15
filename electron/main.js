@@ -1,14 +1,17 @@
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const WebSocket = require("ws");
 const dns = require("dns").promises;
 
 let mainWindow;
+let ws;
+
+const deployedAppURL = "https://signage-content-web-app.vercel.app/";
+const localAppURL = "http://localhost:3000";
 
 async function isInternetConnected() {
   try {
-    // Check if DNS resolution works
-    await dns.lookup("example.com");
+    await dns.lookup(deployedAppURL);
     return true;
   } catch {
     return false;
@@ -20,32 +23,39 @@ async function createWindow() {
     width: 1000,
     height: 1000,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  const deployedAppURL = "https://signage-content-web-app.vercel.app/";
-  const localAppURL = "http://localhost:3000";
-
-  // Check for internet connection
   const isOnline = await isInternetConnected();
 
-  if (isOnline) {
-    console.log("Internet connection detected. Loading deployed app...");
-    mainWindow.loadURL(deployedAppURL).catch(() => {
-      console.error(
-        "Failed to load deployed app. Falling back to local app..."
-      );
-      mainWindow.loadURL(localAppURL);
-    });
-  } else {
-    console.log("No internet connection detected. Loading local app...");
-    mainWindow.loadURL(localAppURL);
+  try {
+    if (isOnline) {
+      console.log("Internet connection detected. Loading deployed app...");
+      await mainWindow.loadURL(deployedAppURL);
+    } else {
+      console.log("No internet connection detected. Loading local app...");
+      await mainWindow.loadURL(localAppURL);
+    }
+  } catch (error) {
+    console.error("Failed to load app:", error);
+    try {
+      await mainWindow.loadURL(localAppURL);
+    } catch (err) {
+      console.error("Failed to load local app:", err);
+    }
   }
 
-  // Connect to the WebSocket server
-  const ws = new WebSocket("ws://localhost:3001");
+  setupWebSocket();
+
+  // Open DevTools for debugging
+  mainWindow.webContents.openDevTools();
+}
+
+function setupWebSocket() {
+  ws = new WebSocket("ws://localhost:3001");
 
   ws.on("open", () => {
     console.log("Connected to WebSocket server");
@@ -54,7 +64,9 @@ async function createWindow() {
 
   ws.on("message", (data) => {
     console.log("Message from server:", data);
-    mainWindow.webContents.send("canvas-update", JSON.parse(data));
+    if (mainWindow) {
+      mainWindow.webContents.send("canvas-update", JSON.parse(data));
+    }
   });
 
   ws.on("error", (error) => {
@@ -64,14 +76,9 @@ async function createWindow() {
   ws.on("close", () => {
     console.log("WebSocket connection closed.");
   });
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-    ws.close();
-  });
 }
 
-app.on("ready", createWindow);
+app.whenReady().then(createWindow);
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {

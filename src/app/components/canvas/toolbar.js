@@ -26,6 +26,18 @@ export default function Toolbar({ initialCanvasData }) {
   });
 
   useEffect(() => {
+    // Set up listener for canvas updates from Electron
+    if (window.electron) {
+      window.electron.receive("canvas-update", (data) => {
+        console.log("Received canvas update:", data);
+        // Handle the update
+      });
+    }
+
+    // Rest of your useEffect...
+  }, []);
+
+  useEffect(() => {
     if (canvasRef.current) {
       // Initialize Fabric.js Canvas
       const initCanvas = new Canvas(canvasRef.current, {
