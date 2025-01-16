@@ -18,16 +18,31 @@ export default async function handler(req, res) {
     const db = client.db("canvasDatabase");
     const collection = db.collection("canvases");
 
-    const existingCanvas = await collection.findOne({ name });
-    if (existingCanvas) {
-      await collection.updateOne({ name }, { $set: { content, status } });
-    } else {
-      await collection.insertOne({ name, content, status });
-    }
+    // Use updateOne with upsert option
+    const result = await collection.updateOne(
+      { name }, // find by name
+      {
+        $set: {
+          content,
+          status,
+          updatedAt: new Date(), // Add timestamp
+          ...(!(await collection.findOne({ name })) && {
+            createdAt: new Date(),
+          }), // Add creation date for new canvases
+        },
+      },
+      { upsert: true } // Create if doesn't exist, update if does
+    );
 
-    res.status(200).json({ message: "Canvas saved successfully!" });
+    return res.status(200).json({
+      message:
+        result.upsertedCount > 0
+          ? "Canvas created successfully!"
+          : "Canvas updated successfully!",
+      operation: result.upsertedCount > 0 ? "created" : "updated",
+    });
   } catch (error) {
     console.error("Error saving canvas:", error);
-    res.status(500).json({ error: "Failed to save canvas" });
+    return res.status(500).json({ error: "Failed to save canvas" });
   }
 }
