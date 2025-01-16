@@ -67,17 +67,37 @@ export default function Toolbar({ initialCanvasData }) {
   useEffect(() => {
     if (!canvas || !wsRef.current) return;
 
+    let isProcessingUpdate = false;
+    let lastUpdateTime = 0;
+    const DEBOUNCE_TIME = 100;
+    const clientId = Math.random().toString(36).substr(2, 9); // Generate unique client ID
+
     // Handler for canvas modifications
     const handleCanvasModification = () => {
-      if (wsRef.current?.readyState === WebSocket.OPEN) {
-        const canvasData = canvas.toJSON();
-        wsRef.current.send(
-          JSON.stringify({
-            type: "canvas-update",
-            data: canvasData,
-          })
-        );
-      }
+      if (
+        isProcessingUpdate ||
+        !wsRef.current ||
+        wsRef.current.readyState !== WebSocket.OPEN
+      )
+        return;
+
+      const now = Date.now();
+      if (now - lastUpdateTime < DEBOUNCE_TIME) return;
+      lastUpdateTime = now;
+
+      const canvasData = canvas.toJSON();
+      wsRef.current.send(
+        JSON.stringify({
+          type: "canvas-update",
+          data: {
+            version: canvasData.version,
+            objects: canvasData.objects,
+            background: "#fff",
+          },
+          sourceClientId: clientId,
+          messageId: Math.random().toString(36).substr(2, 9),
+        })
+      );
     };
 
     // WebSocket message handler
@@ -86,30 +106,57 @@ export default function Toolbar({ initialCanvasData }) {
         const message = JSON.parse(event.data);
 
         if (message.type === "canvas-update") {
+          // Ignore own messages
+          if (message.sourceClientId === clientId) {
+            return;
+          }
+
           // Compare current canvas state with incoming state
-          const currentState = JSON.stringify(canvas.toJSON());
-          const incomingState = JSON.stringify(message.data);
+          const currentState = JSON.stringify({
+            objects: canvas.toJSON().objects,
+            background: "#fff",
+          });
+          const incomingState = JSON.stringify({
+            objects: message.data.objects,
+            background: "#fff",
+          });
 
-          // Only update if the states are different
-          if (currentState !== incomingState) {
-            // Temporarily remove event listeners to prevent feedback loops
-            canvas.off("object:modified", handleCanvasModification);
-            canvas.off("object:added", handleCanvasModification);
-            canvas.off("object:removed", handleCanvasModification);
+          // If states are the same, break the loop
+          if (currentState === incomingState) {
+            return;
+          }
 
-            // Update canvas with received data
-            canvas.loadFromJSON(message.data, () => {
+          // Set processing flag to prevent sending updates while loading
+          isProcessingUpdate = true;
+
+          // Temporarily remove event listeners
+          canvas.off("object:modified", handleCanvasModification);
+          canvas.off("object:added", handleCanvasModification);
+          canvas.off("object:removed", handleCanvasModification);
+
+          // Update canvas with received data
+          canvas.loadFromJSON(
+            {
+              ...message.data,
+              background: "#fff", // Force white background
+            },
+            () => {
+              canvas.backgroundColor = "#fff";
               canvas.requestRenderAll();
 
-              // Reattach event listeners
-              canvas.on("object:modified", handleCanvasModification);
-              canvas.on("object:added", handleCanvasModification);
-              canvas.on("object:removed", handleCanvasModification);
-            });
-          }
+              // Reattach event listeners after a delay
+              setTimeout(() => {
+                canvas.on("object:modified", handleCanvasModification);
+                canvas.on("object:added", handleCanvasModification);
+                canvas.on("object:removed", handleCanvasModification);
+                isProcessingUpdate = false;
+              }, DEBOUNCE_TIME);
+            }
+          );
         }
       } catch (error) {
         console.error("Error processing WebSocket message:", error);
+        isProcessingUpdate = false;
       }
     };
 
