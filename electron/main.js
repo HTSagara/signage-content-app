@@ -1,11 +1,7 @@
-import { app, BrowserWindow, ipcMain } from "electron";
-import path from "path";
-import { fileURLToPath } from "url";
-import WebSocket from "ws";
-import dns from "dns/promises";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const { app, BrowserWindow, ipcMain } = require("electron");
+const path = require("path");
+const WebSocket = require("ws");
+const dns = require("dns").promises;
 
 let mainWindow;
 let ws;

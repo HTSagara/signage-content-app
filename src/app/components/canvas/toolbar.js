@@ -14,6 +14,8 @@ import DialogTitle from "@mui/material/DialogTitle";
 import "@/styles/styles.scss";
 import Settings from "./settings";
 import Image from "./image";
+import { useWebSocket } from "../../hooks/useWebSocket";
+import { useCanvasSync } from "../../hooks/useCanvasSync";
 
 export default function Toolbar({ initialCanvasData }) {
   // Refs and state management
@@ -27,157 +29,9 @@ export default function Toolbar({ initialCanvasData }) {
     height: 500,
   });
 
-  // WebSocket connection setup
-  useEffect(() => {
-    const wsUrl =
-      process.env.NODE_ENV === "production"
-        ? "wss://your-production-url"
-        : "ws://localhost:3001";
-
-    // Create WebSocket connection
-    const setupWebSocket = () => {
-      wsRef.current = new WebSocket(wsUrl);
-
-      wsRef.current.onopen = () => {
-        console.log("WebSocket connection established");
-      };
-
-      wsRef.current.onclose = () => {
-        console.log("WebSocket connection closed");
-        // Attempt to reconnect after 5 seconds
-        setTimeout(setupWebSocket, 5000);
-      };
-
-      wsRef.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
-    };
-
-    setupWebSocket();
-
-    // Cleanup on unmount
-    return () => {
-      if (wsRef.current) {
-        wsRef.current.close();
-      }
-    };
-  }, []);
-
-  // Canvas WebSocket synchronization
-  useEffect(() => {
-    if (!canvas || !wsRef.current) return;
-
-    let isProcessingUpdate = false;
-    let lastUpdateTime = 0;
-    const DEBOUNCE_TIME = 100;
-    const clientId = Math.random().toString(36).substr(2, 9); // Generate unique client ID
-
-    // Handler for canvas modifications
-    const handleCanvasModification = () => {
-      if (
-        isProcessingUpdate ||
-        !wsRef.current ||
-        wsRef.current.readyState !== WebSocket.OPEN
-      )
-        return;
-
-      const now = Date.now();
-      if (now - lastUpdateTime < DEBOUNCE_TIME) return;
-      lastUpdateTime = now;
-
-      const canvasData = canvas.toJSON();
-      wsRef.current.send(
-        JSON.stringify({
-          type: "canvas-update",
-          data: {
-            version: canvasData.version,
-            objects: canvasData.objects,
-            background: "#fff",
-          },
-          sourceClientId: clientId,
-          messageId: Math.random().toString(36).substr(2, 9),
-        })
-      );
-    };
-
-    // WebSocket message handler
-    const handleWebSocketMessage = (event) => {
-      try {
-        const message = JSON.parse(event.data);
-
-        if (message.type === "canvas-update") {
-          // Ignore own messages
-          if (message.sourceClientId === clientId) {
-            return;
-          }
-
-          // Compare current canvas state with incoming state
-          const currentState = JSON.stringify({
-            objects: canvas.toJSON().objects,
-            background: "#fff",
-          });
-          const incomingState = JSON.stringify({
-            objects: message.data.objects,
-            background: "#fff",
-          });
-
-          // If states are the same, break the loop
-          if (currentState === incomingState) {
-            return;
-          }
-
-          // Set processing flag to prevent sending updates while loading
-          isProcessingUpdate = true;
-
-          // Temporarily remove event listeners
-          canvas.off("object:modified", handleCanvasModification);
-          canvas.off("object:added", handleCanvasModification);
-          canvas.off("object:removed", handleCanvasModification);
-
-          // Update canvas with received data
-          canvas.loadFromJSON(
-            {
-              ...message.data,
-              background: "#fff", // Force white background
-            },
-            () => {
-              canvas.backgroundColor = "#fff";
-              canvas.requestRenderAll();
-
-              // Reattach event listeners after a delay
-              setTimeout(() => {
-                canvas.on("object:modified", handleCanvasModification);
-                canvas.on("object:added", handleCanvasModification);
-                canvas.on("object:removed", handleCanvasModification);
-                isProcessingUpdate = false;
-              }, DEBOUNCE_TIME);
-            }
-          );
-        }
-      } catch (error) {
-        console.error("Error processing WebSocket message:", error);
-        isProcessingUpdate = false;
-      }
-    };
-
-    // Set up WebSocket message handler
-    wsRef.current.onmessage = handleWebSocketMessage;
-
-    // Set up canvas event listeners
-    canvas.on("object:modified", handleCanvasModification);
-    canvas.on("object:added", handleCanvasModification);
-    canvas.on("object:removed", handleCanvasModification);
-
-    // Cleanup function
-    return () => {
-      canvas.off("object:modified", handleCanvasModification);
-      canvas.off("object:added", handleCanvasModification);
-      canvas.off("object:removed", handleCanvasModification);
-      if (wsRef.current) {
-        wsRef.current.onmessage = null;
-      }
-    };
-  }, [canvas]);
+  // Use the custom hooks
+  useWebSocket(wsRef);
+  useCanvasSync(canvas, wsRef);
 
   // Initialize canvas
   useEffect(() => {

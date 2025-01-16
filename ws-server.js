@@ -1,4 +1,4 @@
-import { WebSocket, WebSocketServer } from "ws";
+const { WebSocket, WebSocketServer } = require("ws");
 
 const server = new WebSocketServer({ port: 3001 });
 const connectedClients = new Set();
