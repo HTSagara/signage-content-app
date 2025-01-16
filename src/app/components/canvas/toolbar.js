@@ -28,6 +28,7 @@ export default function Toolbar({ initialCanvasData }) {
     width: 500,
     height: 500,
   });
+  const [canvasName, setCanvasName] = useState(initialCanvasData?.name);
 
   // Use the custom hooks
   useWebSocket(wsRef);
@@ -154,8 +155,8 @@ export default function Toolbar({ initialCanvasData }) {
       return;
     }
 
-    const canvasName = prompt("Enter a name for your canvas:");
-    if (!canvasName) {
+    const nameToSave = canvasName || prompt("Enter a name for your canvas:");
+    if (!nameToSave) {
       alert("Canvas name is required!");
       return;
     }
@@ -213,13 +214,19 @@ export default function Toolbar({ initialCanvasData }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: canvasName,
+          name: nameToSave,
           content: canvas.toJSON(),
-          status: postImmediately ? "posted" : "draft",
+          status: postImmediately
+            ? "posted"
+            : initialCanvasData?.status || "draft",
         }),
       });
 
       if (response.ok) {
+        // Set the canvas name if it was a new canvas
+        if (!canvasName) {
+          setCanvasName(nameToSave);
+        }
         alert("Canvas saved successfully!");
       } else {
         const errorData = await response.json();

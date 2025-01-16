@@ -1,34 +1,31 @@
+// pages/menu.js
 import Navbar from "@/app/components/navbar/navbar";
 import Link from "next/link";
 import "@/styles/styles.scss";
+import styles from "@/styles/menu.module.scss";
 import { useState } from "react";
-import { MongoClient } from "mongodb";
+import { connectToDatabase } from "@/lib/mongodb";
 
-export async function getStaticProps() {
-  const client = new MongoClient(process.env.MONGODB_URI);
-
+export async function getServerSideProps() {
   let canvasList = [];
   try {
-    await client.connect();
+    const client = await connectToDatabase();
     const db = client.db("canvasDatabase");
     const collection = db.collection("canvases");
 
     canvasList = await collection.find({}).toArray();
   } catch (error) {
     console.error("Error fetching canvases:", error);
-  } finally {
-    await client.close();
   }
 
   return {
-    props: { canvasList: JSON.parse(JSON.stringify(canvasList)) }, // Ensure serializable data
+    props: { canvasList: JSON.parse(JSON.stringify(canvasList)) },
   };
 }
 
 export default function Menu({ canvasList }) {
   const [canvases, setCanvases] = useState(canvasList);
 
-  // Function to post a draft canvas
   const postCanvas = async (name) => {
     try {
       const response = await fetch("/api/updateCanvasStatus", {
@@ -56,7 +53,6 @@ export default function Menu({ canvasList }) {
     }
   };
 
-  // Function to delete a canvas
   const deleteCanvas = async (name) => {
     try {
       const response = await fetch("/api/deleteCanvas", {
@@ -85,23 +81,25 @@ export default function Menu({ canvasList }) {
   return (
     <>
       <Navbar />
-      <div className="Menu">
+      <div className={styles.Menu}>
         <header>
           <h1>Saved Canvases</h1>
         </header>
         <main>
           {canvases.length > 0 ? (
-            <ul>
+            <ul className={styles.list}>
               {canvases.map((canvas, index) => (
-                <li key={index} className="CanvasItem">
+                <li key={index} className={styles.CanvasItem}>
                   <div>
                     <h3>{canvas.name}</h3>
                     <p>Objects: {canvas.content.objects.length}</p>
                     <p>
                       Status:{" "}
                       <span
-                        className={`status ${
-                          canvas.status === "posted" ? "posted" : "draft"
+                        className={`${styles.status} ${
+                          canvas.status === "posted"
+                            ? styles.posted
+                            : styles.draft
                         }`}
                       >
                         {canvas.status || "draft"}
@@ -110,15 +108,19 @@ export default function Menu({ canvasList }) {
                   </div>
                   <div>
                     <Link href={`/canvas/${canvas.name}`}>
-                      <button>Edit</button>
+                      <button className={styles.button}>Edit</button>
                     </Link>
                     <button
+                      className={styles.button}
                       onClick={() => postCanvas(canvas.name)}
                       disabled={canvas.status === "posted"}
                     >
                       {canvas.status === "posted" ? "Posted" : "Post"}
                     </button>
-                    <button onClick={() => deleteCanvas(canvas.name)}>
+                    <button
+                      className={styles.button}
+                      onClick={() => deleteCanvas(canvas.name)}
+                    >
                       Delete
                     </button>
                   </div>
@@ -129,60 +131,6 @@ export default function Menu({ canvasList }) {
             <p>No canvases found. Start by creating one!</p>
           )}
         </main>
-
-        <style jsx>{`
-          .Menu {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            text-align: center;
-          }
-
-          ul {
-            list-style: none;
-            padding: 0;
-          }
-
-          .CanvasItem {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border: 1px solid #ddd;
-            margin-bottom: 10px;
-            border-radius: 5px;
-          }
-
-          .status {
-            font-weight: bold;
-          }
-
-          .status.posted {
-            color: green;
-          }
-
-          .status.draft {
-            color: orange;
-          }
-
-          button {
-            background: #6200ea;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 8px;
-          }
-
-          button:hover {
-            background: #3700b3;
-          }
-
-          button:disabled {
-            background: #bdbdbd;
-            cursor: not-allowed;
-          }
-        `}</style>
       </div>
     </>
   );
