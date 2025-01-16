@@ -1,34 +1,81 @@
-const { app, BrowserWindow } = require("electron");
-const path = require("path");
-const WebSocket = require("ws");
+import { app, BrowserWindow, ipcMain } from "electron";
+import path from "path";
+import { fileURLToPath } from "url";
+import WebSocket from "ws";
+import dns from "dns/promises";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow;
+let ws;
+
+const deployedAppURL = "http://localhost:3000";
+const localAppURL = "http://localhost:3000";
+
+async function isInternetConnected() {
+  try {
+    await dns.lookup("example.com");
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 async function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1000,
+    height: 1000,
     webPreferences: {
-      nodeIntegration: true,
-      contextIsolation: false,
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, "preload.js"),
     },
   });
 
-  // Load the deployed Next.js app
-  const deployedAppURL = "https://signage-content-web-app.vercel.app/";
-  mainWindow.loadURL(deployedAppURL);
+  const isOnline = await isInternetConnected();
 
-  // Connect to the WebSocket server
-  const ws = new WebSocket("ws://localhost:3001");
+  try {
+    if (isOnline) {
+      console.log("Internet connection detected. Loading deployed app...");
+      await mainWindow.loadURL(deployedAppURL);
+    } else {
+      console.log("No internet connection detected. Loading local app...");
+      await mainWindow.loadURL(localAppURL);
+    }
+  } catch (error) {
+    console.error("Failed to load app:", error);
+    try {
+      await mainWindow.loadURL(localAppURL);
+    } catch (err) {
+      console.error("Failed to load local app:", err);
+    }
+  }
+
+  setupWebSocket();
+  mainWindow.webContents.openDevTools();
+}
+
+function setupWebSocket() {
+  ws = new WebSocket("ws://localhost:3001");
 
   ws.on("open", () => {
     console.log("Connected to WebSocket server");
-    ws.send("Hello from Electron!");
   });
 
   ws.on("message", (data) => {
-    console.log("Message from server:", data);
-    mainWindow.webContents.send("canvas-update", JSON.parse(data));
+    try {
+      const message = JSON.parse(data);
+      console.log("Electron received message:", message); // Debug log
+
+      if (message.type === "canvas-update" && mainWindow) {
+        console.log("Sending to renderer process:", message.data); // Debug log
+        mainWindow.webContents.send("canvas-update", message.data);
+      }
+    } catch (error) {
+      console.error("Error processing WebSocket message:", error);
+      console.error("Raw message:", data.toString());
+    }
   });
 
   ws.on("error", (error) => {
@@ -36,13 +83,21 @@ async function createWindow() {
   });
 
   ws.on("close", () => {
-    console.log("WebSocket connection closed.");
-  });
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-    ws.close();
+    console.log("WebSocket connection closed");
+    setTimeout(setupWebSocket, 5000);
   });
 }
 
-app.on("ready", createWindow);
+app.whenReady().then(createWindow);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
+    app.quit();
+  }
+});
+
+app.on("activate", () => {
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
+});
