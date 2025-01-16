@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 let mainWindow;
 let ws;
 
-const deployedAppURL = "http://localhost:3000";
+const deployedAppURL = "https://signage-content-web-app.vercel.app/";
 const localAppURL = "http://localhost:3000";
 
 async function isInternetConnected() {
