@@ -1,0 +1,52 @@
+// styles/menu.module.scss
+.Menu {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  text-align: center;
+}
+
+.CanvasItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 10px;
+  border-radius: 5px;
+}
+
+.status {
+  font-weight: bold;
+
+  &.posted {
+    color: green;
+  }
+
+  &.draft {
+    color: orange;
+  }
+}
+
+.button {
+  background: #6200ea;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 8px;
+
+  &:hover {
+    background: #3700b3;
+  }
+
+  &:disabled {
+    background: #bdbdbd;
+    cursor: not-allowed;
+  }
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+}

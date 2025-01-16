@@ -2,7 +2,7 @@
 import Toolbar from "@/app/components/canvas/toolbar";
 import "@/styles/styles.scss";
 import Navbar from "@/app/components/navbar/navbar";
-import styles from "./name.module.scss";
+import styles from "@/styles/name.module.scss";
 import { MongoClient } from "mongodb";
 
 export async function getServerSideProps(context) {
