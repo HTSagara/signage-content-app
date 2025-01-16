@@ -1,17 +1,21 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
-const WebSocket = require("ws");
-const dns = require("dns").promises;
+import { app, BrowserWindow, ipcMain } from "electron";
+import path from "path";
+import { fileURLToPath } from "url";
+import WebSocket from "ws";
+import dns from "dns/promises";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 let mainWindow;
 let ws;
 
-const deployedAppURL = "https://signage-content-web-app.vercel.app/";
+const deployedAppURL = "http://localhost:3000";
 const localAppURL = "http://localhost:3000";
 
 async function isInternetConnected() {
   try {
-    await dns.lookup(deployedAppURL);
+    await dns.lookup("example.com");
     return true;
   } catch {
     return false;
@@ -49,8 +53,6 @@ async function createWindow() {
   }
 
   setupWebSocket();
-
-  // Open DevTools for debugging
   mainWindow.webContents.openDevTools();
 }
 
@@ -59,13 +61,20 @@ function setupWebSocket() {
 
   ws.on("open", () => {
     console.log("Connected to WebSocket server");
-    ws.send("Hello from Electron!");
   });
 
   ws.on("message", (data) => {
-    console.log("Message from server:", data);
-    if (mainWindow) {
-      mainWindow.webContents.send("canvas-update", JSON.parse(data));
+    try {
+      const message = JSON.parse(data);
+      console.log("Electron received message:", message); // Debug log
+
+      if (message.type === "canvas-update" && mainWindow) {
+        console.log("Sending to renderer process:", message.data); // Debug log
+        mainWindow.webContents.send("canvas-update", message.data);
+      }
+    } catch (error) {
+      console.error("Error processing WebSocket message:", error);
+      console.error("Raw message:", data.toString());
     }
   });
 
@@ -74,7 +83,8 @@ function setupWebSocket() {
   });
 
   ws.on("close", () => {
-    console.log("WebSocket connection closed.");
+    console.log("WebSocket connection closed");
+    setTimeout(setupWebSocket, 5000);
   });
 }
 

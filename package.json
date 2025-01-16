@@ -1,6 +1,7 @@
 {
   "name": "signage-content-app",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -20,6 +21,7 @@
     "blocksin-system": "^1.5.9",
     "busboy": "^1.6.0",
     "cloudinary": "^2.5.1",
+    "concurrently": "^9.1.2",
     "dns": "^0.2.2",
     "fabric": "^6.5.3",
     "formidable": "^3.5.2",
